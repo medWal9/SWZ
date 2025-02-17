@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: ${BUILD_TARGET:-base-dev}
+        ports:
+            - '12345:12345' # Mappe le port 3000 du conteneur au port 3000 de l'hôte
+        environment:
+            - NODE_ENV=${ENVIRONMENT:-dev} # Définair l'environnement à 'dev'
+            - BUILD_TARGET=${BUILD_TARGET}
+        #- MONGO_URI=mongodb://mongo:27017/ma_base_de_donnees # URI de connexion à MongoDB
+        volumes:
+            - .:/app # Monte le répertoire actuel dans /app dans le conteneur
+            - /app/node_modules # Ignore node_modules du volume pour éviter les conflits
+        command: npm start # Commande pour lancer l'application
+        depends_on:
+            - mongo # Assure que MongoDB est lancé avant l'application
+    mongo:
+        image: mongo:latest # Utilise l'image officielle de MongoDB
+        ports:
+            - '27017:27017' # Mappe le port 27017 du conteneur au port 27017 de l'hôte
+        volumes:
+            - mongo_data:/data/db # Persiste les données de MongoDB
+volumes:
+    mongo_data:
