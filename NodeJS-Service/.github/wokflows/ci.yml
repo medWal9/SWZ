@@ -1,0 +1,68 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'NodeJS-Service/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'NodeJS-Service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: NodeJS-Service
+
+      - name: Run lint
+        run: npm run lint
+        working-directory: NodeJS-Service
+
+      - name: Run tests
+        run: npm test
+        working-directory: NodeJS-Service
+
+      - name: Build project
+        run: npm run build
+        working-directory: NodeJS-Service
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18.x
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: NodeJS-Service
+
+      - name: Deploy to server
+        run: |
+          # Add your deployment script here
+          echo "Deploying to server..."
+        working-directory: NodeJS-Service
